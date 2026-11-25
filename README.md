@@ -54,3 +54,15 @@ dotnet test Vairas.ChatBackend.slnx             # Docker required for PostgreSQL
 
 API exports: `api/`. Extended notes, design sources, validation reports and evidence:
 `../../Documentation/Backend/Vairas.ChatBackend/`.
+
+## Tests and coverage
+
+Requirements: .NET SDK 10 and Docker (PostgreSQL integration tests start a throw-away container via Testcontainers).
+
+```powershell
+dotnet test Vairas.ChatBackend.slnx                  # unit + integration tests
+dotnet test Vairas.ChatBackend.ServiceTests/Vairas.ChatBackend.ServiceTests.csproj   # end-to-end smoke test (not part of the solution)
+dotnet test Vairas.ChatBackend.slnx --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults   # measure coverage
+```
+
+**Coverage report:** [docs/coverage/README.md](docs/coverage/README.md) (summary, per-assembly table, least covered files); machine-readable `docs/coverage/coverage-summary.json` and `docs/coverage/index.html` (per-file table). The raw cobertura XML of a local run is written to `TestResults/`.
