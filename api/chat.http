@@ -1,0 +1,46 @@
+@gateway = https://localhost:7000
+@chatInternal = https://localhost:7800
+@schoolId = 11111111-1111-4111-8111-111111111111
+@sessionId = 22222222-2222-4222-8222-222222222222
+@previewId = 33333333-3333-4333-8333-333333333333
+@operationId = 44444444-4444-4444-8444-444444444444
+# Supply tokens and IDs from a configured synthetic environment.
+@userToken = REPLACE_WITH_USER_TOKEN
+@workloadToken = REPLACE_WITH_SCOPED_WORKLOAD_TOKEN
+@fingerprint = REPLACE_WITH_EXACT_PREVIEW_DIGEST
+
+### Create private school-scoped session; retain this key for retries
+POST {{gateway}}/api/v1/chat/sessions
+Authorization: Bearer {{userToken}}
+Idempotency-Key: {{operationId}}
+Content-Type: application/json
+
+{"schoolId":"{{schoolId}}"}
+
+### Generate synchronous reply (model disabled by default)
+POST {{gateway}}/api/v1/chat/sessions/{{sessionId}}/messages?schoolId={{schoolId}}
+Authorization: Bearer {{userToken}}
+Idempotency-Key: 55555555-5555-4555-8555-555555555555
+Content-Type: application/json
+
+{"text":"Show my enrollments in the current synthetic school."}
+
+### Review exact server preview before approval
+GET {{gateway}}/api/v1/chat/action-previews/{{previewId}}?schoolId={{schoolId}}
+Authorization: Bearer {{userToken}}
+
+### Human consent only; operationId/key/digest must come from that preview
+POST {{gateway}}/api/v1/chat/action-previews/{{previewId}}/confirmations?schoolId={{schoolId}}
+Authorization: Bearer {{userToken}}
+Origin: https://localhost:4200
+Idempotency-Key: {{operationId}}
+Content-Type: application/json
+
+{"operationId":"{{operationId}}","argumentsFingerprint":"{{fingerprint}}","approved":true}
+
+### Internal recorded-intent query; executionAllowed always false
+POST {{chatInternal}}/internal/v1/chat/confirmations/validate
+Authorization: Bearer {{workloadToken}}
+Content-Type: application/json
+
+{"schoolId":"{{schoolId}}","sessionId":"{{sessionId}}","previewId":"{{previewId}}","identityId":"66666666-6666-4666-8666-666666666666","operationId":"{{operationId}}","argumentsFingerprint":"{{fingerprint}}"}

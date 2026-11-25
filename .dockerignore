@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/TestResults
+**/.local
+.git
+evidence
+certs
+**/appsettings.Local.json
+**/*.pfx
+**/*.pem
